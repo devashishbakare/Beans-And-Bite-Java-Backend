@@ -4,4 +4,4 @@ public enum ProductType {
         Veg,
         Non_Veg,
         Vegan
-    }
+}
