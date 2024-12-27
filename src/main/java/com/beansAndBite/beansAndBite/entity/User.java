@@ -1,5 +1,4 @@
 package com.beansAndBite.beansAndBite.entity;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Positive;
@@ -10,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "user")
 @Getter
 @Setter
 @ToString
@@ -51,6 +51,5 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
-    @Positive
-    private Double wallet;
+    private Double wallet = 0.0;
 }

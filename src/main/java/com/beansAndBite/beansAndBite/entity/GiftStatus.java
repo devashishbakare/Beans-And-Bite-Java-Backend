@@ -3,6 +3,8 @@ package com.beansAndBite.beansAndBite.entity;
 import com.beansAndBite.beansAndBite.enums.GiftStatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
+@Entity
+@Table(name = "gift_status")
 @Getter
 @Setter
 @NoArgsConstructor

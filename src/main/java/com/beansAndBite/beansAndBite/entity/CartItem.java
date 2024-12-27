@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "cart_item")
 @Getter
 @Setter
 @ToString
@@ -47,6 +48,8 @@ public class CartItem {
     private WhippedTopping whippedTopping;
 
     @Valid
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "cart_item_id", referencedColumnName = "id")
     private List<SyrupAndSaucesInfo> syrupAndSaucesInfo = new ArrayList<>();
 
 }

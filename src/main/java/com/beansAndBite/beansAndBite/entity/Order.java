@@ -9,6 +9,7 @@ import lombok.*;
 import java.util.List;
 
 @Entity
+@Table(name = "orders")
 @Getter
 @Setter
 @ToString
@@ -25,7 +26,6 @@ public class Order {
     private User user;
 
     @OneToMany
-    @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)
     private List<Product> products;
 
     @NotBlank
