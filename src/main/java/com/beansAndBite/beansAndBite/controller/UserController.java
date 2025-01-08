@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,8 +45,8 @@ public class UserController {
     public ResponseEntity<?> signIn(@RequestBody @Valid LoginRequest loginRequest){
         System.out.println(loginRequest.toString());
         String token = userService.signInUser(loginRequest);
-        return ResponseEntity.ok(Map.of(
-                "Message" , "user login successfull",
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of(
+                "Message" , "user login successful",
                 "token", token
         ));
     }

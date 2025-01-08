@@ -5,17 +5,23 @@ import com.beansAndBite.beansAndBite.entity.Product;
 import com.beansAndBite.beansAndBite.exception.DataIntegrityViolationException;
 import com.beansAndBite.beansAndBite.exception.ResourceNotFoundException;
 import com.beansAndBite.beansAndBite.repository.ProductRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 @Service
 public class ProductServiceImp implements ProductService{
     private ProductRepository productRepository;
-
+    @Autowired
+    private EntityManager entityManager;
     @Autowired
     public ProductServiceImp(ProductRepository productRepository){
         this.productRepository = productRepository;
@@ -50,4 +56,49 @@ public class ProductServiceImp implements ProductService{
             throw new ResourceNotFoundException("product not fond with id " + id + ex.getMessage());
         }
     }
+
+    public Page<Product> getSearchResult(String searchQuery, int page){
+        String searchKeywords[] = searchQuery.split(" ");
+        Pageable pageable = PageRequest.of(page-1, 5);
+
+        StringBuilder customQuery = new StringBuilder("select p from Product p where ");
+
+        List<String> subQueries = new ArrayList<>();
+
+        for(int index = 0; index < searchKeywords.length; index++){
+
+            String searchKeywordParam = "keyword" + index;
+            String subQuery = "(LOWER(p.name) LIKE LOWER(CONCAT('%', :" + searchKeywordParam + ", '%')) " +
+                    "OR LOWER(p.category) LIKE LOWER(CONCAT('%', :" + searchKeywordParam + ", '%')) " +
+                    "OR LOWER(p.productType) LIKE LOWER(CONCAT('%', :" + searchKeywordParam + ", '%')))";
+
+            subQueries.add(subQuery);
+        }
+
+        customQuery.append(String.join(" OR ", subQueries));
+
+        TypedQuery<Product> query =  entityManager.createQuery(customQuery.toString(), Product.class);
+
+        for(int i = 0; i < searchKeywords.length; i++){
+            String keyword = searchKeywords[i];
+            query.setParameter("keyword" + i, keyword);
+        }
+
+        query.setFirstResult((page-1) * 5);
+        query.setMaxResults(5);
+
+        List<Product> result = query.getResultList();
+        //till now we have the result, to know user better we need to send other information as well
+
+        String updatedQuery = customQuery.toString().replace("select p", "select count(p)");
+        TypedQuery<Long> countQuery = entityManager.createQuery(updatedQuery, Long.class);
+
+        for(int i = 0; i < searchKeywords.length; i++){
+            countQuery.setParameter("keyword" + i, searchKeywords[i]);
+        }
+
+        long totalResult = countQuery.getSingleResult();
+        return new PageImpl<>(result, pageable, totalResult);
+    }
+
 }
