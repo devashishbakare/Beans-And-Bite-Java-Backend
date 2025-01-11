@@ -2,6 +2,7 @@ package com.beansAndBite.beansAndBite.service;
 
 import com.beansAndBite.beansAndBite.dto.ProductRequestDTO;
 import com.beansAndBite.beansAndBite.entity.Product;
+import com.beansAndBite.beansAndBite.enums.Category;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface ProductService {
 
     Page<Product> getSearchResult(String searchQuery, int page);
 
+    List<Product> productByCategory(Category category);
+    List<Product> getProductForHomepage(List<Category> categories);
 }

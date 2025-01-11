@@ -1,9 +1,13 @@
 package com.beansAndBite.beansAndBite.controller;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import com.beansAndBite.beansAndBite.dto.ProductRequestDTO;
 import com.beansAndBite.beansAndBite.entity.Product;
 
+import com.beansAndBite.beansAndBite.enums.Category;
+import com.beansAndBite.beansAndBite.exception.CategoryNotFoundException;
+import com.beansAndBite.beansAndBite.exception.ErrorResponse;
 import com.beansAndBite.beansAndBite.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +50,33 @@ public class ProductController {
                 "data loaded for page no: ", searchResult.getNumber()+1
         );
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/category/{categoryName}")
+    public ResponseEntity<?> getProductByCategory(@PathVariable String categoryName){
+        try{
+            Category category = Category.valueOf(categoryName);
+            //System.out.println(category);
+            List<Product> products = productService.productByCategory(category);
+            Map<String, Object> storeResponse = Map.of("message", "product by category",
+                    "products" , products);
+            return ResponseEntity.status(HttpStatus.OK).body(storeResponse);
+        }catch(Exception ex){
+            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Category not found", LocalDateTime.now().toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @GetMapping("/homepage")
+    public ResponseEntity<?> fetchProductsForHomepage(){
+        try{
+            List<Category> categories = Arrays.asList(Category.Bestseller, Category.Drinks);
+            List<Product> products = productService.getProductForHomepage(categories);
+            return ResponseEntity.status(HttpStatus.OK).body(products);
+        }catch(Exception ex){
+            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong " + ex.getMessage(), LocalDateTime.now().toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package com.beansAndBite.beansAndBite.service;
 
 import com.beansAndBite.beansAndBite.dto.ProductRequestDTO;
 import com.beansAndBite.beansAndBite.entity.Product;
+import com.beansAndBite.beansAndBite.enums.Category;
 import com.beansAndBite.beansAndBite.exception.DataIntegrityViolationException;
 import com.beansAndBite.beansAndBite.exception.ResourceNotFoundException;
 import com.beansAndBite.beansAndBite.repository.ProductRepository;
@@ -99,6 +100,15 @@ public class ProductServiceImp implements ProductService{
 
         long totalResult = countQuery.getSingleResult();
         return new PageImpl<>(result, pageable, totalResult);
+    }
+
+    @Override
+    public List<Product> productByCategory(Category categoryName){
+        return productRepository.findByCategory(categoryName);
+    }
+
+    public List<Product> getProductForHomepage(List<Category> categories){
+        return productRepository.findByCategoryIn(categories);
     }
 
 }
