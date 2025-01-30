@@ -59,7 +59,7 @@ public class ProductController {
             //System.out.println(category);
             List<Product> products = productService.productByCategory(category);
             Map<String, Object> storeResponse = Map.of("message", "product by category",
-                    "products" , products);
+                    "data" , products);
             return ResponseEntity.status(HttpStatus.OK).body(storeResponse);
         }catch(Exception ex){
             ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Category not found", LocalDateTime.now().toString());

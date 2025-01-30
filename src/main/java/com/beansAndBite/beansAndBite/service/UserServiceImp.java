@@ -1,64 +1,56 @@
 package com.beansAndBite.beansAndBite.service;
-
 import com.beansAndBite.beansAndBite.dto.LoginRequest;
 import com.beansAndBite.beansAndBite.entity.User;
-import com.beansAndBite.beansAndBite.exception.ResourceNotFoundException;
-import com.beansAndBite.beansAndBite.exception.UserNotFoundException;
+import com.beansAndBite.beansAndBite.exception.AuthenticationException;
 import com.beansAndBite.beansAndBite.repository.UserRepository;
-import com.beansAndBite.beansAndBite.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImp implements UserService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
+
+    private final AuthenticationManager authenticationManager;
+
+    public UserServiceImp(UserRepository userRepository,
+                          AuthenticationManager authenticationManager,
+                          PasswordEncoder passwordEncoder){
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+
     @Override
-    public String signUpUser(User user) {
+    public User signUpUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
 
-        String email = user.getEmail();
-        String mobileNumber = user.getMobileNumber();
-        String password = user.getPassword();
-
-        if(userRepository.findByEmailOrMobileNumber(email, mobileNumber).isPresent()){
-            throw new RuntimeException("email or mobile number is already exists");
-        }
-
-        String hashedPassword = passwordEncoder.encode(password);
-        user.setPassword(hashedPassword);
-
-        User savedUser = userRepository.save(user);
-        return jwtUtil.generateToken(email, savedUser.getId());
-
+    public User authenticate(LoginRequest input) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        input.getUserName(),
+                        input.getPassword()
+                )
+        );
+        return userRepository.findByEmailIdOrMobileNumber(input.getUserName()).orElseThrow();
     }
 
     @Override
-    public String signInUser(LoginRequest loginRequest) {
-
-        String userName = loginRequest.getUserName();
-        String password = loginRequest.getPassword();
-
-        /*
-        User user = userRepository.findByEmail(userName);
-
-        if(user == null){
-            user = userRepository.findByMobileNumber(userName);
-        }
-         */
-
-        User user = userRepository.findByEmailIdOrMobileNumber(userName);
-
-        if(user == null || passwordEncoder.matches(password, user.getPassword()) == false){
-            throw new RuntimeException("Username or password is not correct");
-        }
-
-        return jwtUtil.generateToken(user.getEmail(), user.getId());
+    public Map<String, Object> signInUser(LoginRequest loginRequest) {
+        return null;
     }
 }
