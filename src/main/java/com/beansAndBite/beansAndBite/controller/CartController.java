@@ -1,6 +1,7 @@
 package com.beansAndBite.beansAndBite.controller;
 
 import com.beansAndBite.beansAndBite.dto.CartItemDTO;
+import com.beansAndBite.beansAndBite.dto.FetchCartProductDTO;
 import com.beansAndBite.beansAndBite.entity.CartItem;
 import com.beansAndBite.beansAndBite.entity.Product;
 import com.beansAndBite.beansAndBite.enums.Category;
@@ -12,10 +13,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -43,4 +41,12 @@ public class CartController {
                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
            }
     }
+
+    @GetMapping("/fetchAll")
+    public ResponseEntity<BaseResponse> addToCart(){
+        List<FetchCartProductDTO> userAllCartProduct = cartService.fetchAllCartItem();
+        Response<List<FetchCartProductDTO>> response = new Response<>("user cart info", userAllCartProduct);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 }

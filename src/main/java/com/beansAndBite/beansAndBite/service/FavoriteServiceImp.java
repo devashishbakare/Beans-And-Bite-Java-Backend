@@ -40,4 +40,12 @@ public class FavoriteServiceImp implements FavoriteService{
         return true;
     }
 
+    public List<Product> fetchUserFavoritesProduct(List<Long> favourites){
+        List<Product> userFavouritesProduct = productRepository.findAllById(favourites);
+        if(userFavouritesProduct.size() != favourites.size()){
+            throw new ProductNotFoundException("Product Not Found");
+        }
+        return userFavouritesProduct;
+    }
+
 }

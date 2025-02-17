@@ -1,6 +1,7 @@
 package com.beansAndBite.beansAndBite.controller;
 import com.beansAndBite.beansAndBite.dto.LoginRequest;
 import com.beansAndBite.beansAndBite.dto.LoginResponse;
+import com.beansAndBite.beansAndBite.dto.LoginResponseDTO;
 import com.beansAndBite.beansAndBite.dto.SignUpDTO;
 import com.beansAndBite.beansAndBite.entity.Product;
 import com.beansAndBite.beansAndBite.entity.User;
@@ -10,6 +11,9 @@ import com.beansAndBite.beansAndBite.service.AuthenticationService;
 import com.beansAndBite.beansAndBite.service.JwtService;
 import com.beansAndBite.beansAndBite.service.UserService;
 import com.beansAndBite.beansAndBite.util.BaseResponse;
+import com.beansAndBite.beansAndBite.util.ErrorInfo;
+import com.beansAndBite.beansAndBite.util.Response;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -39,32 +43,31 @@ public class UserController {
 
     @PostMapping("/signUp")
     //@Operation(summary = "Sign Up", description = "Register a new user")
-    public ResponseEntity<?> signUp(@RequestBody @Valid SignUpDTO signUpData){
+    public ResponseEntity<BaseResponse> signUp(@RequestBody @Valid SignUpDTO signUpData){
         try{
             User user = new User(signUpData.getName(), signUpData.getEmail(), signUpData.getMobileNumber(), signUpData.getPassword());
             System.out.println("before validating user");
-            Map<String, Object> userInfo = authenticationService.signup(user);
-            Map<String, Object> storeResponse = Map.of("message", "Sign Up user successfully",
-                    "data" , userInfo);
-            return ResponseEntity.status(HttpStatus.OK).body(storeResponse);
+            LoginResponseDTO userDetails = authenticationService.signup(user);
+            Response<LoginResponseDTO> response = new Response<>("user login successful", userDetails);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch(Exception ex){
-            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage() + " something went wrong while user sign up", LocalDateTime.now().toString());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            ErrorInfo errorInfo = new ErrorInfo(HttpStatus.OK.value(), "something went wrong" + ex.getMessage(), LocalDateTime.now().toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorInfo);
         }
     }
 
     @PostMapping("/signIn")
     //@Operation(summary = "Sign In", description = "Login User")
-    public ResponseEntity<?> signIn(@RequestBody @Valid LoginRequest loginRequest){
+    public ResponseEntity<BaseResponse> signIn(@RequestBody @Valid LoginRequest loginRequest){
         try{
             System.out.println("before authentication");
-            Map<String, Object> userInfo = authenticationService.signIn(loginRequest);
-            Map<String, Object> storeResponse = Map.of("message", "User login successful",
-                    "data" , userInfo);
-            return ResponseEntity.status(HttpStatus.OK).body(storeResponse);
+            LoginResponseDTO loginDetails = authenticationService.signIn(loginRequest);
+            Response<LoginResponseDTO> response = new Response<>("user login successful", loginDetails);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+
         }catch(Exception ex){
-            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage() + " something went wrong while signing in", LocalDateTime.now().toString());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            ErrorInfo errorInfo = new ErrorInfo(HttpStatus.OK.value(), "something went wrong" + ex.getMessage(), LocalDateTime.now().toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorInfo);
         }
     }
 

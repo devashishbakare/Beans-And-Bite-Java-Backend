@@ -31,4 +31,12 @@ public class EnumUtil {
         }
     }
 
+    public static <T extends Enum<T>> String convertEnumToString(T enumValue) {
+        if (enumValue == null) {
+            return ""; // Handle null case
+        }
+        return enumValue.name().replace("_", " ");
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package com.beansAndBite.beansAndBite.service;
 
 import com.beansAndBite.beansAndBite.dto.CartItemDTO;
+import com.beansAndBite.beansAndBite.dto.FetchCartProductDTO;
 import com.beansAndBite.beansAndBite.entity.CartItem;
 import com.beansAndBite.beansAndBite.entity.Product;
 import com.beansAndBite.beansAndBite.entity.SyrupAndSaucesInfo;
@@ -8,6 +9,7 @@ import com.beansAndBite.beansAndBite.entity.User;
 import com.beansAndBite.beansAndBite.enums.*;
 import com.beansAndBite.beansAndBite.exception.InvalidEnumValueException;
 import com.beansAndBite.beansAndBite.exception.ResourceNotFoundException;
+import com.beansAndBite.beansAndBite.exception.UserNotFoundException;
 import com.beansAndBite.beansAndBite.repository.CartItemRepository;
 import com.beansAndBite.beansAndBite.repository.ProductRepository;
 import com.beansAndBite.beansAndBite.repository.UserRepository;
@@ -92,6 +94,46 @@ public class CartServiceImp implements CartService{
             log.error("Invalid enum value provided: {}", e.getMessage());
             throw new InvalidEnumValueException("Invalid enum value provided");
         }
+    }
+
+
+    @Transactional
+    public List<FetchCartProductDTO> fetchAllCartItem(){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User) authentication.getPrincipal();
+        User user = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new UserNotFoundException("user not found"));
+        //log.info("user {}", user.getName());
+        Hibernate.initialize(user.getCart());
+        List<CartItem> cartItems = user.getCart();
+        //log.info("cart size {}", cartItems.size());
+        List<FetchCartProductDTO> storeCartProduct = new ArrayList<>();
+        int counter = 0;
+        for(CartItem cartItem : cartItems){
+            //log.info("cart item syrup info has been initialize {}" ,cartItem.getSyrupAndSaucesInfo().size());
+            List<FetchCartProductDTO.SyrupAndSauceResponse> storeSyrupInfo = new ArrayList<>();
+            for(SyrupAndSaucesInfo syrupAndSaucesInfo : cartItem.getSyrupAndSaucesInfo()){
+                FetchCartProductDTO.SyrupAndSauceResponse info = new FetchCartProductDTO.SyrupAndSauceResponse(EnumUtil.convertEnumToString(syrupAndSaucesInfo.getSyrupAndSauce()) ,syrupAndSaucesInfo.getQuantity());
+                storeSyrupInfo.add(info);
+            }
+
+            FetchCartProductDTO fetchCartProductDTO = FetchCartProductDTO.builder().
+                    _id(cartItem.getId()).
+                    userId(user.getId()).
+                    productId(cartItem.getProduct()).
+                    amount(cartItem.getAmount()).
+                    size(EnumUtil.convertEnumToString(cartItem.getSize())).
+                    milk(EnumUtil.convertEnumToString(cartItem.getMilk())).
+                    espresso(EnumUtil.convertEnumToString(cartItem.getEspresso())).
+                    temperature(EnumUtil.convertEnumToString(cartItem.getTemperature())).
+                    whippedTopping(EnumUtil.convertEnumToString(cartItem.getWhippedTopping())).
+                    SyrupAndSauce(storeSyrupInfo).build();
+            //log.info("processing cartItem {}", ++counter);
+            storeCartProduct.add(fetchCartProductDTO);
+        }
+        //log.info("total store cart product size {}", storeCartProduct.size());
+        //log.info("sample data {}", storeCartProduct.get(0).getProductId().getName());
+        return storeCartProduct;
     }
 
 

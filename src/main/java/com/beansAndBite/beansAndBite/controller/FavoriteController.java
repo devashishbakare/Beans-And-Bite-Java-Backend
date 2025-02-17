@@ -1,6 +1,7 @@
 package com.beansAndBite.beansAndBite.controller;
 
 import com.beansAndBite.beansAndBite.dto.AddToFavoriteRequestDTO;
+import com.beansAndBite.beansAndBite.entity.Product;
 import com.beansAndBite.beansAndBite.service.FavoriteService;
 import com.beansAndBite.beansAndBite.util.BaseResponse;
 import com.beansAndBite.beansAndBite.util.ErrorInfo;
@@ -8,10 +9,7 @@ import com.beansAndBite.beansAndBite.util.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +35,13 @@ public class FavoriteController {
             ErrorInfo errorResponse = new ErrorInfo(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong", LocalDateTime.now().toString());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
+    }
+
+    @GetMapping("/getFavorites")
+    public ResponseEntity<BaseResponse> fetchUserFavorites(@RequestParam List<Long> favourites){
+        List<Product> userFavouritesProduct = favoriteService.fetchUserFavoritesProduct(favourites);
+        Response<List<Product>> response = new Response<>("User favourites products", userFavouritesProduct);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }

@@ -2,6 +2,7 @@ package com.beansAndBite.beansAndBite.service;
 
 import com.beansAndBite.beansAndBite.dto.LoginRequest;
 import com.beansAndBite.beansAndBite.dto.LoginResponse;
+import com.beansAndBite.beansAndBite.dto.LoginResponseDTO;
 import com.beansAndBite.beansAndBite.entity.User;
 import com.beansAndBite.beansAndBite.exception.UserNotFoundException;
 import com.beansAndBite.beansAndBite.repository.UserRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -40,7 +42,7 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Map<String, Object> signup(@RequestBody @Valid User user) {
+    public LoginResponseDTO signup(@RequestBody @Valid User user) {
         System.out.println("inside sign up logic");
         String userName = user.getUsername();
         String password = user.getPassword();
@@ -63,28 +65,40 @@ public class AuthenticationService {
         User user = userRepository.findByEmailIdOrMobileNumber(input.getUserName())
                 .orElseThrow();
 
-        Hibernate.initialize(user.getCart());
-        Hibernate.initialize(user.getFavourites());
-        Hibernate.initialize(user.getOrders());
-        Hibernate.initialize(user.getGifts());
+//        Hibernate.initialize(user.getCart());
+//        Hibernate.initialize(user.getFavourites());
+//        Hibernate.initialize(user.getOrders());
+//        Hibernate.initialize(user.getGifts());
 
         return user;
     }
 
-    public Map<String, Object> signIn(LoginRequest loginRequest){
+    public LoginResponseDTO signIn(LoginRequest loginRequest){
         System.out.println("authentication login request");
         User authenticatedUser = authenticate(loginRequest);
         //System.out.println("authenticated user " + authenticatedUser);
         String jwtToken = jwtService.generateToken(authenticatedUser);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("token", jwtToken);
-        response.put("cartCount", authenticatedUser.getCart().size());
-        response.put("favouriteCount", authenticatedUser.getFavourites().size());
-        response.put("favourites", authenticatedUser.getFavourites());
-        response.put("wallet", authenticatedUser.getWallet());
-        System.out.println("returning response from authentication sign in");
-        return response;
+        int cartCount = userRepository.countCartItemsByUserId(authenticatedUser.getId());
+        List<Long> favouriteProductIds = userRepository.findFavouriteProductIdsByUserId(authenticatedUser.getId());
+        int favouriteCount = favouriteProductIds.size();
+
+        LoginResponseDTO loginResponse = LoginResponseDTO.builder().
+                token(jwtToken).
+                cartCount(cartCount).
+                favouriteCount(favouriteCount).
+                favourites(favouriteProductIds).
+                wallet(authenticatedUser.getWallet()).
+                build();
+
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("token", jwtToken);
+//        response.put("cartCount", cartCount);
+//        response.put("favouriteCount", favouriteCount);
+//        response.put("favourites", favouriteProductIds);
+//        response.put("wallet", authenticatedUser.getWallet());
+//        System.out.println("returning response from authentication sign in");
+        return loginResponse;
     }
 
 }
