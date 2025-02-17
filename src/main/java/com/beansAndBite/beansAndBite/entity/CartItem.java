@@ -1,6 +1,9 @@
 package com.beansAndBite.beansAndBite.entity;
 
 import com.beansAndBite.beansAndBite.enums.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -16,6 +19,7 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +27,7 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @ManyToOne
@@ -47,9 +52,7 @@ public class CartItem {
     @Enumerated(EnumType.STRING)
     private WhippedTopping whippedTopping;
 
-    @Valid
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cart_item_id", referencedColumnName = "id")
+    @ElementCollection
+    @CollectionTable(name = "cart_item_syrups", joinColumns = @JoinColumn(name = "cart_item_id"))
     private List<SyrupAndSaucesInfo> syrupAndSaucesInfo = new ArrayList<>();
-
 }

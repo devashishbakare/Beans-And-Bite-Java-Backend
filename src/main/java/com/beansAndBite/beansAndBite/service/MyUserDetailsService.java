@@ -17,7 +17,8 @@ public class MyUserDetailsService implements UserDetailsService{
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username){
+        //System.out.println("before finding user in db");
         User user = userRepository.findByEmailIdOrMobileNumber(username).orElseThrow();
         //System.out.println("loaded user in custom user details " +user);
         return user;

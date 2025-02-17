@@ -9,6 +9,9 @@ import com.beansAndBite.beansAndBite.enums.Category;
 import com.beansAndBite.beansAndBite.exception.CategoryNotFoundException;
 import com.beansAndBite.beansAndBite.exception.ErrorResponse;
 import com.beansAndBite.beansAndBite.service.ProductService;
+import com.beansAndBite.beansAndBite.util.BaseResponse;
+import com.beansAndBite.beansAndBite.util.ErrorInfo;
+import com.beansAndBite.beansAndBite.util.Response;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,9 +22,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/product")
 public class ProductController {
-    private ProductService productService;
 
-    @Autowired
+    private final ProductService productService;
+
+
     public ProductController(ProductService productService){
         this.productService = productService;
     }
@@ -33,9 +37,11 @@ public class ProductController {
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<Product> getProductInfo(@PathVariable Long id){
+    public ResponseEntity<Response<Product>> getProductInfo(@PathVariable Long id){
         Product product = productService.getProductInfo(id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(product);
+        System.out.println("this is product " + product);
+        Response<Product> response = new Response<>("Product info", product);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/search")
@@ -45,9 +51,9 @@ public class ProductController {
         Map<String, Object> response = Map.of(
           "message" , "search result",
                 "data", searchResult.getContent(),
-                "total pages" , searchResult.getTotalPages(),
-                "total product" , searchResult.getTotalElements(),
-                "data loaded for page no: ", searchResult.getNumber()+1
+                "totalPages" , searchResult.getTotalPages(),
+                "totalProduct" , searchResult.getTotalElements(),
+                "currentPage", searchResult.getNumber()+1
         );
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -68,15 +74,27 @@ public class ProductController {
     }
 
     @GetMapping("/homepage")
-    public ResponseEntity<?> fetchProductsForHomepage(){
+    public ResponseEntity<BaseResponse> fetchProductsForHomepage(){
         try{
             List<Category> categories = Arrays.asList(Category.Bestseller, Category.Drinks);
             List<Product> products = productService.getProductForHomepage(categories);
-            return ResponseEntity.status(HttpStatus.OK).body(products);
+            Response<List<Product>> response = new Response<>("product for homepage", products);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch(Exception ex){
-            ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong " + ex.getMessage(), LocalDateTime.now().toString());
+            ErrorInfo errorResponse = new ErrorInfo(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong " + ex.getMessage(), LocalDateTime.now().toString());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
+    @GetMapping("/update")
+    public ResponseEntity<List<Product>> updateProduct(){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.updateAllCategory());
+    }
+
+    @GetMapping("/show")
+    public ResponseEntity<List<Product>> showAllProduct(){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.showAllProduct());
+    }
+
 
 }

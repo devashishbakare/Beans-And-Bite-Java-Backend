@@ -1,6 +1,6 @@
 package com.beansAndBite.beansAndBite.enums;
 
 public enum Espresso {
-    INDIAN_ESPRESSO_ROAST, // Default option
-    EXTRA_SHOT
+    Indian_Espresso_Roast,
+    Extra_Shot
 }

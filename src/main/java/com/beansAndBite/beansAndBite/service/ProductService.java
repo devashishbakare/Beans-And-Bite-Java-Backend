@@ -18,4 +18,6 @@ public interface ProductService {
 
     List<Product> productByCategory(Category category);
     List<Product> getProductForHomepage(List<Category> categories);
+    List<Product> updateAllCategory();
+    List<Product> showAllProduct();
 }

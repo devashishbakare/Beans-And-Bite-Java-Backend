@@ -3,9 +3,11 @@ package com.beansAndBite.beansAndBite.service;
 import com.beansAndBite.beansAndBite.dto.ProductRequestDTO;
 import com.beansAndBite.beansAndBite.entity.Product;
 import com.beansAndBite.beansAndBite.enums.Category;
+import com.beansAndBite.beansAndBite.enums.ProductType;
 import com.beansAndBite.beansAndBite.exception.DataIntegrityViolationException;
 import com.beansAndBite.beansAndBite.exception.ResourceNotFoundException;
 import com.beansAndBite.beansAndBite.repository.ProductRepository;
+import com.beansAndBite.beansAndBite.util.EnumUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +22,10 @@ import java.util.*;
 
 @Service
 public class ProductServiceImp implements ProductService{
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
     @Autowired
     private EntityManager entityManager;
-    @Autowired
+
     public ProductServiceImp(ProductRepository productRepository){
         this.productRepository = productRepository;
     }
@@ -35,11 +37,13 @@ public class ProductServiceImp implements ProductService{
             product.setName(dto.getName());
             product.setProductInfo(dto.getProductInfo());
             product.setProductDetails(dto.getProductDetails());
-            product.setCategory(dto.getCategory());
+            product.setCategory(EnumUtil.convertToEnum(Category.class, dto.getCategory()));
             product.setPrice(dto.getPrice());
             product.setProductCartImage(dto.getProductCartImage());
             product.setProductDetailsImage(dto.getProductDetailsImage());
-            product.setProductType(dto.getProductType());
+            if(dto.getProductType() != null){
+                product.setProductType(EnumUtil.convertToEnum(ProductType.class, dto.getProductType()));
+            }
             products.add(product);
         }
         try{
@@ -109,6 +113,21 @@ public class ProductServiceImp implements ProductService{
 
     public List<Product> getProductForHomepage(List<Category> categories){
         return productRepository.findByCategoryIn(categories);
+    }
+
+    public List<Product> updateAllCategory(){
+        List<Product> products = productRepository.findAll();
+        for(Product product : products){
+            Category category = EnumUtil.convertToEnum(Category.class, product.getCategory().toString());
+            ProductType productType = EnumUtil.convertToEnum(ProductType.class, product.getProductType().toString());
+            product.setCategory(category);
+            product.setProductType(productType);
+        }
+        return productRepository.saveAll(products);
+    }
+
+    public List<Product> showAllProduct(){
+        return productRepository.findAll();
     }
 
 }

@@ -11,7 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class GiftStatus {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

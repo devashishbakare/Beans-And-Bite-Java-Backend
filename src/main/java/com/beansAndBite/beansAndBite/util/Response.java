@@ -1,11 +1,15 @@
 package com.beansAndBite.beansAndBite.util;
 
-public class Response<T> {
-    private String message;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class Response<T> extends BaseResponse{
     private T data;
 
     public Response(String message, T data) {
-        this.message = message;
+        super(message);
         this.data = data;
     }
 }

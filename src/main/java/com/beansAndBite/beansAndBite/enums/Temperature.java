@@ -1,7 +1,7 @@
 package com.beansAndBite.beansAndBite.enums;
 
 public enum Temperature {
-    NORMAL_HOT,
-    KIDS_HOT,
-    EXTRA_HOT
+    Normal_Hot,
+    Kids_Hot,
+    Extra_Hot
 }
