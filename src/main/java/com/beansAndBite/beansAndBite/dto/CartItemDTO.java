@@ -11,7 +11,7 @@ import java.util.List;
 @ToString
 public class CartItemDTO {
 
-    private String cartId; // Nullable, so no validation
+    private Long cartId; // Nullable, so no validation
 
     @NotBlank(message = "Espresso selection is required")
     private String espresso;

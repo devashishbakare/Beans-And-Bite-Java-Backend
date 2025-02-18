@@ -13,4 +13,5 @@ public interface CartService {
 
    List<FetchCartProductDTO> fetchAllCartItem();
 
+   void updateCartProduct(CartItemDTO cartItemDTO);
 }

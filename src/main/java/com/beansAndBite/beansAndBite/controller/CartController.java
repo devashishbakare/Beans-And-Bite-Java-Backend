@@ -49,4 +49,11 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PatchMapping("/updateCartItem")
+    public ResponseEntity<BaseResponse> updateCartItem(@RequestBody @Valid CartItemDTO cartItemDTO){
+        cartService.updateCartProduct(cartItemDTO);
+        Response<String> response = new Response<>("user cart info", null);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 }

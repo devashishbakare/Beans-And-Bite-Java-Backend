@@ -47,6 +47,7 @@ public class CartServiceImp implements CartService{
 
 
     @Transactional
+    @Override
     public boolean addToCart(CartItemDTO cartItemDTO) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -98,6 +99,7 @@ public class CartServiceImp implements CartService{
 
 
     @Transactional
+    @Override
     public List<FetchCartProductDTO> fetchAllCartItem(){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -136,7 +138,26 @@ public class CartServiceImp implements CartService{
         return storeCartProduct;
     }
 
+    @Transactional
+    @Override
+    public void updateCartProduct(CartItemDTO cartItemDTO){
 
+        long cartId = cartItemDTO.getCartId();
+        CartItem cartItem = cartItemRepository.findById(cartId).orElseThrow(() -> new ResourceNotFoundException("cart item not found"));
+        validateAndSetEnums(cartItem, cartItemDTO);
+        cartItem.setAmount(cartItemDTO.getPrice());
+        List<SyrupAndSaucesInfo> storeSyrupAndSaucesInfo = new ArrayList<>();
+        for (CartItemDTO.SyrupAndSauceDTO syrupInfo : cartItemDTO.getSyrupAndSauces()) {
+            SyrupAndSauce syrupAndSauce = EnumUtil.convertToEnum(SyrupAndSauce.class, syrupInfo.getType());
+            SyrupAndSaucesInfo syrupAndSaucesInfo = SyrupAndSaucesInfo.builder()
+                    .syrupAndSauce(syrupAndSauce)
+                    .quantity(syrupInfo.getQuantity())
+                    .build();
+            storeSyrupAndSaucesInfo.add(syrupAndSaucesInfo);
+        }
+        cartItem.setSyrupAndSaucesInfo(storeSyrupAndSaucesInfo);
+        cartItemRepository.save(cartItem);
+    }
 }
 
 
