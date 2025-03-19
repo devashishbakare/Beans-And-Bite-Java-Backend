@@ -37,10 +37,12 @@ public class orderServiceImp implements OrderService{
         User user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         log.info("fetched user {}", user.getName());
         List<Product> products = new ArrayList<>();
+        List<CartItem> cartItems = new ArrayList<>();
         double totalAmount = 0;
         log.info("fetching cartItem from cart");
         for(long cartCustomizationId : placeOrderDTO.getProducts()){
             CartItem cartItem = cartItemRepository.findById(cartCustomizationId).orElseThrow(() -> new ResourceNotFoundException("cart item not found"));
+            cartItems.add(cartItem);
             totalAmount += cartItem.getAmount();
             products.add(cartItem.getProduct());
         }
@@ -56,7 +58,8 @@ public class orderServiceImp implements OrderService{
         log.info("converted to enum {} ", paymentMethod);
         Order order = Order.builder().user(user).products(products).takeAwayFrom(placeOrderDTO.getTakeAwayFrom()).amount(totalAmount).paymentMethod(paymentMethod).additionalMessage(placeOrderDTO.getAdditionalMessage()).build();
         orderRepository.save(order);
-        log.info("order has been created");
+        log.info("order has been created {}", order.getId());
+        log.info("order has this product {}", order.getProducts().get(0));
         if(placeOrderDTO.getPaymentMethod().toLowerCase().equals("wallet")){
             if(user.getWallet() < totalAmount){
                 throw new InsufficientBalanceException("wallet money is not enough");
@@ -65,7 +68,11 @@ public class orderServiceImp implements OrderService{
             user.setCart(new ArrayList<>());
             user.setWallet(user.getWallet()-totalAmount);
             userRepository.save(user);
-            log.info("user updates has been saved");
+            log.info("user has been updated");
+            for(CartItem cartItem : cartItems){
+                cartItemRepository.delete(cartItem);
+            }
+            log.info("cart item has been deleted");
             return new CreateOrderResponseForWallet(order.getId(), placeOrderDTO.getPaymentMethod(), user.getWallet());
         }else{
            return new CreateOrderResponseForPaymentGateway(order.getId(), placeOrderDTO.getPaymentMethod());
