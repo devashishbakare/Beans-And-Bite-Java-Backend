@@ -52,7 +52,14 @@ public class CartController {
     @PatchMapping("/updateCartItem")
     public ResponseEntity<BaseResponse> updateCartItem(@RequestBody @Valid CartItemDTO cartItemDTO){
         cartService.updateCartProduct(cartItemDTO);
-        Response<String> response = new Response<>("user cart info", null);
+        Response<String> response = new Response<>("cart item has updated", null);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/deleteCartItem/{cartId}")
+    public ResponseEntity<BaseResponse> deleteCartItem(@PathVariable Long cartId){
+        cartService.deleteCartItem(cartId);
+        Response<String> response = new Response<>("cart item has been deleted", null);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

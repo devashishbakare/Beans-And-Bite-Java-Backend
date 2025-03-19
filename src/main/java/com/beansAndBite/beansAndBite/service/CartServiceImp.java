@@ -158,6 +158,24 @@ public class CartServiceImp implements CartService{
         cartItem.setSyrupAndSaucesInfo(storeSyrupAndSaucesInfo);
         cartItemRepository.save(cartItem);
     }
+
+    @Transactional
+    @Override
+    public void deleteCartItem(Long cartId){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User authenticatedUser = (User) authentication.getPrincipal();
+
+        CartItem cartItem = cartItemRepository.findById(cartId).orElseThrow(() -> new ResourceNotFoundException("cart item not found"));
+        User user = cartItem.getUser();
+
+        if(!authenticatedUser.getId().equals(user.getId())){
+            throw new RuntimeException("Un-Authorize access: cart item is not own by input request user");
+        }
+        // here deleting the cart item will also result into deleting from user because there is one to many and many to one relationship is there so there is no need of explicitly deleting cart item from user
+        cartItemRepository.delete(cartItem);
+    }
+
 }
 
 

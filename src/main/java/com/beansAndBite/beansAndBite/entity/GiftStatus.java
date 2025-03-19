@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class GiftStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +23,7 @@ public class GiftStatus {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne
     @JoinColumn(name = "gift_details_id", referencedColumnName = "id", nullable = false)
     private GiftDetails giftDetails;
 }

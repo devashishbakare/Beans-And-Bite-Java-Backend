@@ -27,4 +27,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT product_id FROM user_favourites WHERE user_id = :userId", nativeQuery = true)
     List<Long> findFavouriteProductIdsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT u FROM User u WHERE u.email = :email OR u.mobileNumber = :mobileNumber")
+    Optional<User> findByEmailOrMobileNumberWithTwoArg(
+            @Param("email") String email,
+            @Param("mobileNumber") String mobileNumber
+    );
+
 }

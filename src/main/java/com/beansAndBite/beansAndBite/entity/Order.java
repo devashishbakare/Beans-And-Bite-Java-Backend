@@ -15,6 +15,7 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Order {
 
     @Id
@@ -36,7 +37,4 @@ public class Order {
     private PaymentMethod paymentMethod;
 
     private String additionalMessage;
-
-
-
 }
