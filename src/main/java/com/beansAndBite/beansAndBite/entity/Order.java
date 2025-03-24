@@ -28,18 +28,16 @@ public class Order {
 
     @ManyToMany
     @JoinTable(
-            name = "order_products",
+            name = "order_cartItems",
             joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
+            inverseJoinColumns = @JoinColumn(name = "cartItem_id")
     )
-    private List<Product> products;
-
+    private List<CartItem> cartItems;
     @NotBlank
     private String takeAwayFrom;
     @Positive
     private Double amount;
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
-
     private String additionalMessage;
 }

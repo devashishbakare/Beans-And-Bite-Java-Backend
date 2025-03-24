@@ -3,7 +3,6 @@ package com.beansAndBite.beansAndBite.service;
 import com.beansAndBite.beansAndBite.dto.*;
 import com.beansAndBite.beansAndBite.entity.CartItem;
 import com.beansAndBite.beansAndBite.entity.Order;
-import com.beansAndBite.beansAndBite.entity.Product;
 import com.beansAndBite.beansAndBite.entity.User;
 import com.beansAndBite.beansAndBite.enums.PaymentMethod;
 import com.beansAndBite.beansAndBite.exception.AmountMismatchException;
@@ -15,10 +14,11 @@ import com.beansAndBite.beansAndBite.repository.UserRepository;
 import com.beansAndBite.beansAndBite.util.EnumUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import java.math.BigDecimal;
+
 import java.util.*;
 
 @Service
@@ -33,20 +33,18 @@ public class orderServiceImp implements OrderService{
     private UserRepository userRepository;
     @Transactional
     public CreateOrderResponse createOrder(PlaceOrderDTO placeOrderDTO){
-        log.info("reached at create order");
+        //log.info("reached at create order");
         User user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        log.info("fetched user {}", user.getName());
-        List<Product> products = new ArrayList<>();
+        //log.info("fetched user {}", user.getName());
         List<CartItem> cartItems = new ArrayList<>();
         double totalAmount = 0;
-        log.info("fetching cartItem from cart");
+        //log.info("fetching cartItem from cart");
         for(long cartCustomizationId : placeOrderDTO.getProducts()){
             CartItem cartItem = cartItemRepository.findById(cartCustomizationId).orElseThrow(() -> new ResourceNotFoundException("cart item not found"));
             cartItems.add(cartItem);
             totalAmount += cartItem.getAmount();
-            products.add(cartItem.getProduct());
         }
-        log.info("product size {}", products.size());
+        //log.info("product size {}", products.size());
         //adding 5% tax here
         totalAmount += (totalAmount / 100) * 5;
         totalAmount = Math.round(totalAmount * 100.0) / 100.0;
@@ -56,23 +54,19 @@ public class orderServiceImp implements OrderService{
         }
         PaymentMethod paymentMethod = EnumUtil.convertToEnum(PaymentMethod.class, placeOrderDTO.getPaymentMethod());
         log.info("converted to enum {} ", paymentMethod);
-        Order order = Order.builder().user(user).products(products).takeAwayFrom(placeOrderDTO.getTakeAwayFrom()).amount(totalAmount).paymentMethod(paymentMethod).additionalMessage(placeOrderDTO.getAdditionalMessage()).build();
+        Order order = Order.builder().user(user).cartItems(cartItems).takeAwayFrom(placeOrderDTO.getTakeAwayFrom()).amount(totalAmount).paymentMethod(paymentMethod).additionalMessage(placeOrderDTO.getAdditionalMessage()).build();
         orderRepository.save(order);
         log.info("order has been created {}", order.getId());
-        log.info("order has this product {}", order.getProducts().get(0));
         if(placeOrderDTO.getPaymentMethod().toLowerCase().equals("wallet")){
             if(user.getWallet() < totalAmount){
                 throw new InsufficientBalanceException("wallet money is not enough");
             }
-            log.info("setting user 63");
+            //Hibernate.initialize(user.getCart());
+            log.info("inside a updating user info");
             user.setCart(new ArrayList<>());
             user.setWallet(user.getWallet()-totalAmount);
             userRepository.save(user);
-            log.info("user has been updated");
-            for(CartItem cartItem : cartItems){
-                cartItemRepository.delete(cartItem);
-            }
-            log.info("cart item has been deleted");
+            log.info("User cart cleared successfully!");
             return new CreateOrderResponseForWallet(order.getId(), placeOrderDTO.getPaymentMethod(), user.getWallet());
         }else{
            return new CreateOrderResponseForPaymentGateway(order.getId(), placeOrderDTO.getPaymentMethod());

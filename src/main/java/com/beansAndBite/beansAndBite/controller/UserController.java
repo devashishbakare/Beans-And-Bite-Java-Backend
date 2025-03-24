@@ -76,4 +76,11 @@ public class UserController {
         System.out.println("from controller route");
         return userService.fetchUserDetails();
     }
+
+    @GetMapping("/getCartCount")
+    private ResponseEntity<BaseResponse> getCount(){
+        int count = userService.getCount();
+        Response<Integer> response = new Response<>("here is user cart count", count);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

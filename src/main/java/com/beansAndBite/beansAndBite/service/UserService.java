@@ -14,6 +14,7 @@ public interface UserService {
     Map<String, Object> signInUser(LoginRequest loginRequest);
 
     ResponseEntity<BaseResponse> fetchUserDetails();
+    int getCount();
 
 
 }

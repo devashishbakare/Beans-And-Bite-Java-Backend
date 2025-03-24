@@ -78,7 +78,7 @@ public class CartServiceImp implements CartService{
         cartItem.setSyrupAndSaucesInfo(storeSyrupAndSaucesInfo);
 
         cartItem = cartItemRepository.save(cartItem);
-        user.getCart().add(cartItem);
+        user.getCart().add(cartItem.getId());
         userRepository.save(user);
         log.info("CartItem successfully added to user with ID: {}", userId);
         return true;
@@ -105,9 +105,11 @@ public class CartServiceImp implements CartService{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User authenticatedUser = (User) authentication.getPrincipal();
         User user = userRepository.findById(authenticatedUser.getId()).orElseThrow(() -> new UserNotFoundException("user not found"));
-        //log.info("user {}", user.getName());
-        Hibernate.initialize(user.getCart());
-        List<CartItem> cartItems = user.getCart();
+        List<CartItem> cartItems = new ArrayList<>();
+        for(long cartId : user.getCart()){
+            CartItem cartItem = cartItemRepository.findById(cartId).orElseThrow(() -> new ResourceNotFoundException("cart item not found in db"));
+            cartItems.add(cartItem);
+        }
         //log.info("cart size {}", cartItems.size());
         List<FetchCartProductDTO> storeCartProduct = new ArrayList<>();
         int counter = 0;
@@ -173,6 +175,8 @@ public class CartServiceImp implements CartService{
             throw new RuntimeException("Un-Authorize access: cart item is not own by input request user");
         }
         // here deleting the cart item will also result into deleting from user because there is one to many and many to one relationship is there so there is no need of explicitly deleting cart item from user
+        user.getCart().remove(cartId);
+        userRepository.save(user);
         cartItemRepository.delete(cartItem);
     }
 

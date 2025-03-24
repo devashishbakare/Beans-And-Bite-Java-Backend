@@ -51,13 +51,11 @@ public class User implements UserDetails {
     )
     private List<Product> favourites = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<CartItem> cart = new ArrayList<>();
+    @ElementCollection
+    private List<Long> cart = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
-
     private Double wallet = 0.0;
 
     @Override
