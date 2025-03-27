@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,8 @@ public class FetchCartProductDTO {
     private String espresso;
     private String temperature;
     private String whippedTopping;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<SyrupAndSauceResponse> SyrupAndSauce = new ArrayList<>();
     @Setter
     @Getter

@@ -16,6 +16,10 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +75,53 @@ public class orderServiceImp implements OrderService{
         }else{
            return new CreateOrderResponseForPaymentGateway(order.getId(), placeOrderDTO.getPaymentMethod());
         }
+    }
+
+    @Transactional
+    public OrderHistoryCollection orderHistory(int page, int limit){
+        User user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        long userId = user.getId();
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createdAt").descending());
+        Page<Order> ordersData = orderRepository.findOrderByUserId(userId, pageable);
+        List<OrderHistoryResponse> orders = new ArrayList<>();
+        for(Order order : ordersData.getContent()){
+
+            List<CartItemData> cartItemDataList = new ArrayList<>();
+
+            for(CartItem cartItem : order.getCartItems()){
+                CartItemData cartItemData = CartItemData.builder()
+                .userId(cartItem.getUser().getId()).
+                        productId(cartItem.getProduct()).
+                        amount(cartItem.getAmount()).
+                        size(cartItem.getSize()).
+                        milk(cartItem.getMilk()).
+                        espresso(cartItem.getEspresso()).
+                        temperature(cartItem.getTemperature()).
+                        whippedTopping(cartItem.getWhippedTopping()).
+                        syrupAndSaucesInfo(cartItem.getSyrupAndSaucesInfo()).
+                        createdAt(cartItem.getCreatedAt()).
+                        updatedAt(cartItem.getUpdatedAt()).
+                        build();
+                cartItemDataList.add(cartItemData);
+
+            }
+            OrderHistoryResponse orderHistoryResponse = OrderHistoryResponse.builder()
+                    ._id(order.getId())
+                    .orderId(order.getId())
+                    .userId(order.getUser().getId())
+                    .products(cartItemDataList)
+                    .takeAwayFrom(order.getTakeAwayFrom())
+                    .amount(order.getAmount())
+                    .paymentMethod(order.getPaymentMethod())
+                    .additionalMessage(order.getAdditionalMessage())
+                    .createdAt(order.getCreatedAt())
+                    .updatedAt(order.getUpdatedAt()).
+                    build();
+            orders.add(orderHistoryResponse);
+        }
+
+        long totalOrder = ordersData.getTotalElements();
+        return new OrderHistoryCollection(orders, totalOrder);
     }
 
 }

@@ -1,4 +1,5 @@
 package com.beansAndBite.beansAndBite.entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -55,6 +56,7 @@ public class User implements UserDetails {
     private List<Long> cart = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonBackReference
     private List<Order> orders = new ArrayList<>();
     private Double wallet = 0.0;
 

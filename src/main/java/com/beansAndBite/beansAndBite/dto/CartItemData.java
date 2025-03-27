@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 @Getter
@@ -22,4 +23,6 @@ public class CartItemData {
     private Temperature temperature;
     private WhippedTopping whippedTopping;
     private List<SyrupAndSaucesInfo> syrupAndSaucesInfo = new ArrayList<>();
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

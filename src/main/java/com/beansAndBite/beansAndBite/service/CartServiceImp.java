@@ -131,7 +131,10 @@ public class CartServiceImp implements CartService{
                     espresso(EnumUtil.convertEnumToString(cartItem.getEspresso())).
                     temperature(EnumUtil.convertEnumToString(cartItem.getTemperature())).
                     whippedTopping(EnumUtil.convertEnumToString(cartItem.getWhippedTopping())).
-                    SyrupAndSauce(storeSyrupInfo).build();
+                    SyrupAndSauce(storeSyrupInfo).
+                    createdAt(cartItem.getCreatedAt()).
+                    updatedAt(cartItem.getUpdatedAt()).
+                    build();
             //log.info("processing cartItem {}", ++counter);
             storeCartProduct.add(fetchCartProductDTO);
         }

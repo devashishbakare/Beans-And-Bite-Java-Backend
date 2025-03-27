@@ -15,6 +15,4 @@ public interface UserService {
 
     ResponseEntity<BaseResponse> fetchUserDetails();
     int getCount();
-
-
 }
