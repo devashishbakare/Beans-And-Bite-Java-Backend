@@ -1,8 +1,5 @@
 package com.beansAndBite.beansAndBite.controller;
-import com.beansAndBite.beansAndBite.dto.LoginRequest;
-import com.beansAndBite.beansAndBite.dto.LoginResponse;
-import com.beansAndBite.beansAndBite.dto.LoginResponseDTO;
-import com.beansAndBite.beansAndBite.dto.SignUpDTO;
+import com.beansAndBite.beansAndBite.dto.*;
 import com.beansAndBite.beansAndBite.entity.Product;
 import com.beansAndBite.beansAndBite.entity.User;
 import com.beansAndBite.beansAndBite.enums.Category;
@@ -81,6 +78,12 @@ public class UserController {
     private ResponseEntity<BaseResponse> getCount(){
         int count = userService.getCount();
         Response<Integer> response = new Response<>("here is user cart count", count);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PatchMapping("/editAccount")
+    private ResponseEntity<BaseResponse> updateUserDetails(@RequestBody @Valid  SignUpDTO userInfo){
+        Response<EditProfileResponse> response = new Response<>("updated user details", userService.updateUserDetails(userInfo));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

@@ -1,7 +1,10 @@
 package com.beansAndBite.beansAndBite.service;
+import com.beansAndBite.beansAndBite.dto.EditProfileResponse;
 import com.beansAndBite.beansAndBite.dto.LoginRequest;
+import com.beansAndBite.beansAndBite.dto.SignUpDTO;
 import com.beansAndBite.beansAndBite.entity.User;
 import com.beansAndBite.beansAndBite.exception.AuthenticationException;
+import com.beansAndBite.beansAndBite.exception.UserNotFoundException;
 import com.beansAndBite.beansAndBite.repository.UserRepository;
 import com.beansAndBite.beansAndBite.util.BaseResponse;
 import com.beansAndBite.beansAndBite.util.ErrorInfo;
@@ -94,6 +97,18 @@ public class UserServiceImp implements UserService {
         User currentUser = (User) authentication.getPrincipal();
         User user = userRepository.findByEmail(currentUser.getEmail()).orElseThrow();
         return user.getCart().size();
+    }
+
+    public EditProfileResponse updateUserDetails(SignUpDTO userInfo){
+        User user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        long userId = user.getId();
+        user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("user not found"));
+        user.setName(userInfo.getName());
+        user.setEmail(userInfo.getEmail());
+        user.setMobileNumber(userInfo.getMobileNumber());
+        user.setPassword(passwordEncoder.encode(userInfo.getPassword()));
+        userRepository.save(user);
+        return new EditProfileResponse(user.getName(), user.getUsername(), user.getEmail(), user.getMobileNumber());
     }
 
 }
