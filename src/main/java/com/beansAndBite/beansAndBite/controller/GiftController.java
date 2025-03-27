@@ -1,6 +1,8 @@
 package com.beansAndBite.beansAndBite.controller;
 
+import com.beansAndBite.beansAndBite.dto.GiftHistoryResponse;
 import com.beansAndBite.beansAndBite.dto.SendGiftCardDTO;
+import com.beansAndBite.beansAndBite.entity.GiftStatus;
 import com.beansAndBite.beansAndBite.service.GiftService;
 import com.beansAndBite.beansAndBite.util.BaseResponse;
 import com.beansAndBite.beansAndBite.util.Response;
@@ -8,10 +10,9 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/gift")
@@ -28,6 +29,12 @@ public class GiftController {
         String updateResponse = giftService.sendGiftViaWallet(sendGiftCardDTO);
         log.info("Controller method response {}", updateResponse);
         Response<String> response = new Response<>("gift has been sent", updateResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<BaseResponse> fetchGiftHistory(@RequestParam int page, @RequestParam int limit){
+        Response<GiftHistoryResponse> response = new Response<>("gift has been sent", giftService.giftHistory(page, limit));
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

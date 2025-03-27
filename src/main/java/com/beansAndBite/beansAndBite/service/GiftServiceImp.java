@@ -1,5 +1,6 @@
 package com.beansAndBite.beansAndBite.service;
 
+import com.beansAndBite.beansAndBite.dto.GiftHistoryResponse;
 import com.beansAndBite.beansAndBite.dto.SendGiftCardDTO;
 import com.beansAndBite.beansAndBite.entity.GiftDetails;
 import com.beansAndBite.beansAndBite.entity.GiftStatus;
@@ -12,10 +13,16 @@ import com.beansAndBite.beansAndBite.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -97,4 +104,12 @@ public class GiftServiceImp implements GiftService{
                 .giftDetails(giftDetails)
                 .build();
     }
+
+    public GiftHistoryResponse giftHistory(int page, int limit){
+        User user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.by("createdAt").descending());
+        Page<GiftStatus> giftHistory = giftDetailsRepository.findGiftDetailsFromUserId(user.getId(), pageable);
+        return new GiftHistoryResponse(giftHistory.getContent(), giftHistory.getTotalElements());
+    }
+
 }

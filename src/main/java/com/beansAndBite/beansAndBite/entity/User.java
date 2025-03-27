@@ -42,6 +42,7 @@ public class User implements UserDetails {
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonBackReference
     private List<GiftStatus> gifts = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
