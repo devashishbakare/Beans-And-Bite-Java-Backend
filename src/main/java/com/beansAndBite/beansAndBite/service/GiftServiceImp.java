@@ -2,6 +2,7 @@ package com.beansAndBite.beansAndBite.service;
 
 import com.beansAndBite.beansAndBite.dto.GiftHistoryResponse;
 import com.beansAndBite.beansAndBite.dto.SendGiftCardDTO;
+import com.beansAndBite.beansAndBite.dto.SendGiftResponse;
 import com.beansAndBite.beansAndBite.entity.GiftDetails;
 import com.beansAndBite.beansAndBite.entity.GiftStatus;
 import com.beansAndBite.beansAndBite.entity.User;
@@ -35,7 +36,7 @@ public class GiftServiceImp implements GiftService{
     private GiftDetailsRepository giftDetailsRepository;
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String sendGiftViaWallet(SendGiftCardDTO sendGiftCardDTO) {
+    public SendGiftResponse sendGiftViaWallet(SendGiftCardDTO sendGiftCardDTO) {
         try {
 
             User authenticatedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -72,12 +73,7 @@ public class GiftServiceImp implements GiftService{
             userRepository.save(sender);
             userRepository.save(receiver);
 
-            StringBuilder response = new StringBuilder();
-            response.append("Sender wallet amount before update: ").append(senderWalletAmountBeforeUpdating)
-                    .append(", sender wallet amount after update: ").append(sender.getWallet())
-                    .append(", receiver wallet amount before update: ").append(receiverWalletAmountBeforeUpdating)
-                    .append(", receiver wallet amount after update: ").append(receiver.getWallet());
-            return response.toString();
+            return new SendGiftResponse(sender.getEmail(), sender.getWallet());
         } catch (Exception e) {
             throw new RuntimeException("error while creating gift card" + e.getMessage());
         }

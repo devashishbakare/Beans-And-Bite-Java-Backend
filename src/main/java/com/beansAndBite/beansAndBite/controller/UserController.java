@@ -82,8 +82,7 @@ public class UserController {
     }
 
     @PatchMapping("/editAccount")
-    private ResponseEntity<BaseResponse> updateUserDetails(@RequestBody @Valid  SignUpDTO userInfo){
-        Response<EditProfileResponse> response = new Response<>("updated user details", userService.updateUserDetails(userInfo));
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    private ResponseEntity<BaseResponse> updateUserDetails(@RequestBody @Valid  EditProfileRequestDTO editProfileRequestDTO){
+        return userService.updateUserInfo(editProfileRequestDTO);
     }
 }

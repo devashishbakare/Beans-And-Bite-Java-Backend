@@ -1,5 +1,6 @@
 package com.beansAndBite.beansAndBite.service;
 
+import com.beansAndBite.beansAndBite.dto.EditProfileRequestDTO;
 import com.beansAndBite.beansAndBite.dto.EditProfileResponse;
 import com.beansAndBite.beansAndBite.dto.LoginRequest;
 import com.beansAndBite.beansAndBite.dto.SignUpDTO;
@@ -17,5 +18,6 @@ public interface UserService {
 
     ResponseEntity<BaseResponse> fetchUserDetails();
     int getCount();
-    public EditProfileResponse updateUserDetails(SignUpDTO userInfo);
+    public EditProfileResponse updateUserDetails(EditProfileRequestDTO editProfileRequestDTO);
+    ResponseEntity<BaseResponse> updateUserInfo(EditProfileRequestDTO editProfileRequestDTO);
 }

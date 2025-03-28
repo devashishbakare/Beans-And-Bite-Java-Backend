@@ -10,6 +10,7 @@ import com.beansAndBite.beansAndBite.exception.CategoryNotFoundException;
 import com.beansAndBite.beansAndBite.exception.ErrorResponse;
 import com.beansAndBite.beansAndBite.service.ProductService;
 import com.beansAndBite.beansAndBite.util.BaseResponse;
+import com.beansAndBite.beansAndBite.util.EnumUtil;
 import com.beansAndBite.beansAndBite.util.ErrorInfo;
 import com.beansAndBite.beansAndBite.util.Response;
 import jakarta.validation.Valid;
@@ -58,10 +59,10 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/category/{categoryName}")
-    public ResponseEntity<?> getProductByCategory(@PathVariable String categoryName){
+    @GetMapping("/category")
+    public ResponseEntity<?> getProductByCategory(@RequestParam String categoryName){
         try{
-            Category category = Category.valueOf(categoryName);
+            Category category = EnumUtil.convertToEnum(Category.class, categoryName);
             //System.out.println(category);
             List<Product> products = productService.productByCategory(category);
             Map<String, Object> storeResponse = Map.of("message", "product by category",

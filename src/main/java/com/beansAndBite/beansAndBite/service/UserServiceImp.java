@@ -1,4 +1,5 @@
 package com.beansAndBite.beansAndBite.service;
+import com.beansAndBite.beansAndBite.dto.EditProfileRequestDTO;
 import com.beansAndBite.beansAndBite.dto.EditProfileResponse;
 import com.beansAndBite.beansAndBite.dto.LoginRequest;
 import com.beansAndBite.beansAndBite.dto.SignUpDTO;
@@ -7,6 +8,7 @@ import com.beansAndBite.beansAndBite.exception.AuthenticationException;
 import com.beansAndBite.beansAndBite.exception.UserNotFoundException;
 import com.beansAndBite.beansAndBite.repository.UserRepository;
 import com.beansAndBite.beansAndBite.util.BaseResponse;
+import com.beansAndBite.beansAndBite.util.ErrorAPIResponse;
 import com.beansAndBite.beansAndBite.util.ErrorInfo;
 import com.beansAndBite.beansAndBite.util.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -78,12 +80,9 @@ public class UserServiceImp implements UserService {
             User currentUser = (User) authentication.getPrincipal();
             User user = userRepository.findByEmail(currentUser.getEmail()).orElseThrow();
 
-            Hibernate.initialize(user.getCart());
-//            Hibernate.initialize(user.getFavourites());
-//            Hibernate.initialize(user.getOrders());
-//            Hibernate.initialize(user.getGifts());
+            EditProfileResponse editProfileResponse = new EditProfileResponse(user.getName(), user.getUsername(), user.getEmail(), user.getMobileNumber());
 
-            Response<User> response = new Response<>("user details", user);
+            Response<EditProfileResponse> response = new Response<>("user details", editProfileResponse);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch(Exception ex){
             ErrorInfo errorResponse = new ErrorInfo(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Something went wrong " + ex.getMessage(), LocalDateTime.now().toString());
@@ -99,16 +98,43 @@ public class UserServiceImp implements UserService {
         return user.getCart().size();
     }
 
-    public EditProfileResponse updateUserDetails(SignUpDTO userInfo){
+    public EditProfileResponse updateUserDetails(EditProfileRequestDTO editProfileRequestDTO){
         User user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         long userId = user.getId();
         user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("user not found"));
-        user.setName(userInfo.getName());
-        user.setEmail(userInfo.getEmail());
-        user.setMobileNumber(userInfo.getMobileNumber());
-        user.setPassword(passwordEncoder.encode(userInfo.getPassword()));
+        user.setName(editProfileRequestDTO.getUserName());
+        user.setEmail(editProfileRequestDTO.getEmail());
+        user.setMobileNumber(editProfileRequestDTO.getMobileNumber());
+        user.setPassword(passwordEncoder.encode(editProfileRequestDTO.getPassword()));
         userRepository.save(user);
         return new EditProfileResponse(user.getName(), user.getUsername(), user.getEmail(), user.getMobileNumber());
+    }
+
+    public ResponseEntity<BaseResponse> updateUserInfo(EditProfileRequestDTO editProfileRequestDTO){
+
+        User user =  (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        long userId = user.getId();
+        user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("user not found"));
+
+        if(!user.getEmail().equals(editProfileRequestDTO.getEmail())){
+            if(userRepository.existsByEmail(editProfileRequestDTO.getEmail())){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorAPIResponse("", "Try different email or password"));
+            }
+        }
+        if(!user.getMobileNumber().equals(editProfileRequestDTO.getMobileNumber())){
+            if(userRepository.existsByMobileNumber(editProfileRequestDTO.getEmail())){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorAPIResponse("", "Try different email or password"));
+            }
+        }
+
+        user.setName(editProfileRequestDTO.getUserName());
+        user.setEmail(editProfileRequestDTO.getEmail());
+        user.setMobileNumber(editProfileRequestDTO.getMobileNumber());
+        user.setPassword(passwordEncoder.encode(editProfileRequestDTO.getPassword()));
+        userRepository.save(user);
+
+       EditProfileResponse editProfileResponse =  new EditProfileResponse(user.getName(), user.getUsername(), user.getEmail(), user.getMobileNumber());
+        return ResponseEntity.status(HttpStatus.OK).body(new Response<EditProfileResponse>("User has been updated", editProfileResponse));
     }
 
 }

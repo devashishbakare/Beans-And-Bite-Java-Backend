@@ -2,6 +2,7 @@ package com.beansAndBite.beansAndBite.controller;
 
 import com.beansAndBite.beansAndBite.dto.GiftHistoryResponse;
 import com.beansAndBite.beansAndBite.dto.SendGiftCardDTO;
+import com.beansAndBite.beansAndBite.dto.SendGiftResponse;
 import com.beansAndBite.beansAndBite.entity.GiftStatus;
 import com.beansAndBite.beansAndBite.service.GiftService;
 import com.beansAndBite.beansAndBite.util.BaseResponse;
@@ -26,9 +27,8 @@ public class GiftController {
 
     @PostMapping("/sendGiftViaWallet")
     public ResponseEntity<BaseResponse> sendGiftToFriend(@RequestBody @Valid SendGiftCardDTO sendGiftCardDTO){
-        String updateResponse = giftService.sendGiftViaWallet(sendGiftCardDTO);
-        log.info("Controller method response {}", updateResponse);
-        Response<String> response = new Response<>("gift has been sent", updateResponse);
+        SendGiftResponse sendGiftResponse = giftService.sendGiftViaWallet(sendGiftCardDTO);
+        Response<SendGiftResponse> response = new Response<>("gift has been sent", sendGiftResponse);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
